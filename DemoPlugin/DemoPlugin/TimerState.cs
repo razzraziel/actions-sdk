@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Timers;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
 
 namespace Loupedeck.DemoPlugin
 {
@@ -19,6 +21,18 @@ namespace Loupedeck.DemoPlugin
                 {
                     ShutdownTime = null;
                     _timer.Stop();
+
+                    if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                    {
+                        ProcessStartInfo psi = new ProcessStartInfo
+                        {
+                            FileName = "osascript",
+                            Arguments = "-e \"tell app 'System Events' to shut down\"",
+                            UseShellExecute = false,
+                            CreateNoWindow = true
+                        };
+                        Process.Start(psi);
+                    }
                 }
                 OnTick?.Invoke();
             };

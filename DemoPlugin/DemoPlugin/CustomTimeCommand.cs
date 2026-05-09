@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Globalization;
+using System.Runtime.InteropServices;
 
 namespace Loupedeck.DemoPlugin
 {
@@ -14,36 +15,73 @@ namespace Loupedeck.DemoPlugin
 
         protected override void RunCommand(String actionParameter)
         {
-            String script = "Add-Type -AssemblyName System.Windows.Forms; Add-Type -AssemblyName System.Drawing; $f = New-Object System.Windows.Forms.Form; $f.Text = 'Custom Time'; $f.Size = New-Object System.Drawing.Size(300,165); $f.StartPosition = 'CenterScreen'; $f.FormBorderStyle = 'FixedToolWindow'; $f.BackColor = [System.Drawing.Color]::FromArgb(32,32,32); $f.ForeColor = [System.Drawing.Color]::White; $f.TopMost = $true; $f.Font = New-Object System.Drawing.Font('Segoe UI', 10); $l = New-Object System.Windows.Forms.Label; $l.Text = 'Kac dakika sonra kapansin?'; $l.Location = New-Object System.Drawing.Point(15,15); $l.AutoSize = $true; $t = New-Object System.Windows.Forms.TextBox; $t.Location = New-Object System.Drawing.Point(15,45); $t.Size = New-Object System.Drawing.Size(250,25); $t.BackColor = [System.Drawing.Color]::FromArgb(45,45,45); $t.ForeColor = [System.Drawing.Color]::White; $t.BorderStyle = 'FixedSingle'; $b = New-Object System.Windows.Forms.Button; $b.Text = 'Baslat'; $b.Location = New-Object System.Drawing.Point(15,80); $b.Size = New-Object System.Drawing.Size(250,30); $b.FlatStyle = 'Flat'; $b.FlatAppearance.BorderSize = 0; $b.BackColor = [System.Drawing.Color]::FromArgb(0,120,215); $b.DialogResult = [System.Windows.Forms.DialogResult]::OK; $f.Controls.Add($l); $f.Controls.Add($t); $f.Controls.Add($b); $f.AcceptButton = $b; if ($f.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) { Write-Output $t.Text }";
+            bool isMac = RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
+            String result = "";
 
-            String encoded = Convert.ToBase64String(System.Text.Encoding.Unicode.GetBytes(script));
-
-            ProcessStartInfo psi = new ProcessStartInfo
+            if (isMac)
             {
-                FileName = "powershell",
-                Arguments = $"-NoProfile -EncodedCommand {encoded}",
-                UseShellExecute = false,
-                RedirectStandardOutput = true,
-                CreateNoWindow = true
-            };
-
-            using (Process process = Process.Start(psi))
-            {
-                String result = process.StandardOutput.ReadToEnd().Trim();
-                process.WaitForExit();
-
-                if (!String.IsNullOrEmpty(result) && Double.TryParse(result.Replace(',', '.'), NumberStyles.Any, CultureInfo.InvariantCulture, out Double minutes))
+                ProcessStartInfo psi = new ProcessStartInfo
                 {
-                    Int32 totalSeconds = (Int32)(minutes * 60);
+                    FileName = "osascript",
+                    UseShellExecute = false,
+                    RedirectStandardInput = true,
+                    RedirectStandardOutput = true,
+                    CreateNoWindow = true
+                };
 
-                    if (TimerState.ShutdownTime.HasValue)
+                using (Process process = Process.Start(psi))
+                {
+                    process.StandardInput.WriteLine("tell application \"System Events\"");
+                    process.StandardInput.WriteLine("activate");
+                    process.StandardInput.WriteLine("set response to display dialog \"Kac dakika sonra kapansin?\" default answer \"60\" buttons {\"Iptal\", \"Baslat\"} default button 2");
+                    process.StandardInput.WriteLine("text returned of response");
+                    process.StandardInput.WriteLine("end tell");
+                    process.StandardInput.Close();
+
+                    result = process.StandardOutput.ReadToEnd().Trim();
+                    process.WaitForExit();
+                }
+            }
+            else
+            {
+                String script = "Add-Type -AssemblyName System.Windows.Forms; Add-Type -AssemblyName System.Drawing; $f = New-Object System.Windows.Forms.Form; $f.Text = 'Custom Time'; $f.Size = New-Object System.Drawing.Size(300,165); $f.StartPosition = 'CenterScreen'; $f.FormBorderStyle = 'FixedToolWindow'; $f.BackColor = [System.Drawing.Color]::FromArgb(32,32,32); $f.ForeColor = [System.Drawing.Color]::White; $f.TopMost = $true; $f.Font = New-Object System.Drawing.Font('Segoe UI', 10); $l = New-Object System.Windows.Forms.Label; $l.Text = 'Kac dakika sonra kapansin?'; $l.Location = New-Object System.Drawing.Point(15,15); $l.AutoSize = $true; $t = New-Object System.Windows.Forms.TextBox; $t.Location = New-Object System.Drawing.Point(15,45); $t.Size = New-Object System.Drawing.Size(250,25); $t.BackColor = [System.Drawing.Color]::FromArgb(45,45,45); $t.ForeColor = [System.Drawing.Color]::White; $t.BorderStyle = 'FixedSingle'; $b = New-Object System.Windows.Forms.Button; $b.Text = 'Baslat'; $b.Location = New-Object System.Drawing.Point(15,80); $b.Size = New-Object System.Drawing.Size(250,30); $b.FlatStyle = 'Flat'; $b.FlatAppearance.BorderSize = 0; $b.BackColor = [System.Drawing.Color]::FromArgb(0,120,215); $b.DialogResult = [System.Windows.Forms.DialogResult]::OK; $f.Controls.Add($l); $f.Controls.Add($t); $f.Controls.Add($b); $f.AcceptButton = $b; if ($f.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) { Write-Output $t.Text }";
+
+                String encoded = Convert.ToBase64String(System.Text.Encoding.Unicode.GetBytes(script));
+
+                ProcessStartInfo psi = new ProcessStartInfo
+                {
+                    FileName = "powershell",
+                    Arguments = $"-NoProfile -EncodedCommand {encoded}",
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    CreateNoWindow = true
+                };
+
+                using (Process process = Process.Start(psi))
+                {
+                    result = process.StandardOutput.ReadToEnd().Trim();
+                    process.WaitForExit();
+                }
+            }
+
+            if (!String.IsNullOrEmpty(result) && Double.TryParse(result.Replace(',', '.'), NumberStyles.Any, CultureInfo.InvariantCulture, out Double minutes))
+            {
+                Int32 totalSeconds = (Int32)(minutes * 60);
+
+                if (TimerState.ShutdownTime.HasValue)
+                {
+                    if (!isMac)
                     {
                         Process.Start("shutdown", "-a");
                     }
-
-                    Process.Start("shutdown", $"-s -t {totalSeconds}");
-                    TimerState.Start(totalSeconds);
                 }
+
+                if (!isMac)
+                {
+                    Process.Start("shutdown", $"-s -t {totalSeconds}");
+                }
+
+                TimerState.Start(totalSeconds);
             }
         }
 

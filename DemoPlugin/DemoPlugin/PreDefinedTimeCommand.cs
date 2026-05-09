@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Globalization;
+using System.Runtime.InteropServices;
 
 namespace Loupedeck.DemoPlugin
 {
@@ -52,6 +53,8 @@ namespace Loupedeck.DemoPlugin
 
         protected override Boolean RunCommand(ActionEditorActionParameters actionParameters)
         {
+            bool isMac = RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
+
             if (actionParameters.TryGetString(MinutesControlName, out var minutesStr) &&
                 Double.TryParse(minutesStr.Replace(',', '.'), NumberStyles.Any, CultureInfo.InvariantCulture, out Double minutes))
             {
@@ -59,10 +62,17 @@ namespace Loupedeck.DemoPlugin
 
                 if (TimerState.ShutdownTime.HasValue)
                 {
-                    Process.Start("shutdown", "-a");
+                    if (!isMac)
+                    {
+                        Process.Start("shutdown", "-a");
+                    }
                 }
 
-                Process.Start("shutdown", $"-s -t {totalSeconds}");
+                if (!isMac)
+                {
+                    Process.Start("shutdown", $"-s -t {totalSeconds}");
+                }
+
                 TimerState.Start(totalSeconds);
 
                 return true;

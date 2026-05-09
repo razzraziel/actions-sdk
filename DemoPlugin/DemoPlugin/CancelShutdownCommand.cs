@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 
 namespace Loupedeck.DemoPlugin
 {
@@ -15,7 +16,11 @@ namespace Loupedeck.DemoPlugin
         {
             if (TimerState.ShutdownTime.HasValue)
             {
-                Process.Start("shutdown", "-a");
+                bool isMac = RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
+                if (!isMac)
+                {
+                    Process.Start("shutdown", "-a");
+                }
                 TimerState.Cancel();
             }
         }
