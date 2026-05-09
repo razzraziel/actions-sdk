@@ -1,13 +1,15 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Globalization;
 
 namespace Loupedeck.DemoPlugin
 {
-    public class ShutdownOnTheFlyCommand : PluginDynamicCommand
+    public class CustomTimeCommand : PluginDynamicCommand
     {
-        public ShutdownOnTheFlyCommand()
+        public CustomTimeCommand()
             : base("Custom Time", "Prompts for minutes and starts timer", "Power Management")
         {
+            TimerState.OnTick += () => this.ActionImageChanged();
         }
 
         protected override void RunCommand(String actionParameter)
@@ -30,12 +32,32 @@ namespace Loupedeck.DemoPlugin
                 String result = process.StandardOutput.ReadToEnd().Trim();
                 process.WaitForExit();
 
-                if (!String.IsNullOrEmpty(result) && Int32.TryParse(result, out Int32 minutes))
+                if (!String.IsNullOrEmpty(result) && Double.TryParse(result.Replace(',', '.'), NumberStyles.Any, CultureInfo.InvariantCulture, out Double minutes))
                 {
-                    Int32 totalSeconds = minutes * 60;
+                    Int32 totalSeconds = (Int32)(minutes * 60);
+
+                    if (TimerState.ShutdownTime.HasValue)
+                    {
+                        Process.Start("shutdown", "-a");
+                    }
+
                     Process.Start("shutdown", $"-s -t {totalSeconds}");
+                    TimerState.Start(totalSeconds);
                 }
             }
+        }
+
+        protected override String GetCommandDisplayName(String actionParameter, PluginImageSize imageSize)
+        {
+            if (TimerState.ShutdownTime.HasValue)
+            {
+                TimeSpan t = TimerState.ShutdownTime.Value - DateTime.Now;
+                if (t.TotalSeconds > 0)
+                {
+                    return $"{(Int32)t.TotalHours:D2}:{t.Minutes:D2}:{t.Seconds:D2}";
+                }
+            }
+            return "Custom Time";
         }
     }
 }
