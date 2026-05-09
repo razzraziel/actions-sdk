@@ -37,6 +37,11 @@ namespace Loupedeck.DemoPlugin
                         Int32 m = (Int32)(minutes % 60);
                         displayName = m == 0 ? $"{h} Hour(s)" : $"{h}h {m}m";
                     }
+                    else if (minutes < 1 && minutes > 0)
+                    {
+                        Int32 s = (Int32)(minutes * 60);
+                        displayName = $"{s} Sec(s)";
+                    }
                     else
                     {
                         displayName = $"{minutes} Min(s)";
