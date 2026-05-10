@@ -21,10 +21,10 @@ pluginFileName: ShutdownTimerPlugin.dll
 version: 1.0
 
 # Author of the plugin. The author can be a company or an individual developer.
-author: razzraziel
+author: Gokhan Yilmaz
 
 # Copyright information.
-copyright: Copyright © 2025 razzraziel. All rights reserved.
+copyright: Copyright © 2026 Gokhan Yilmaz. All rights reserved.
 
 # Minimum SDK version supported by the plugin.
 minimumLoupedeckVersion: 6.0
