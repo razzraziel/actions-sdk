@@ -66,6 +66,9 @@ namespace Loupedeck.DemoPlugin
 
             if (!String.IsNullOrEmpty(result) && Double.TryParse(result.Replace(',', '.'), NumberStyles.Any, CultureInfo.InvariantCulture, out Double minutes))
             {
+                if (minutes < 0.5) minutes = 0.5;
+                if (minutes > 7200) minutes = 7200;
+
                 Int32 totalSeconds = (Int32)(minutes * 60);
 
                 if (TimerState.ShutdownTime.HasValue)

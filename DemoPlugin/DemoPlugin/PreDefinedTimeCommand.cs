@@ -30,28 +30,35 @@ namespace Loupedeck.DemoPlugin
                 var controlValue = e.ActionEditorState.GetControlValue(MinutesControlName);
                 if (Double.TryParse(controlValue.Replace(',', '.'), NumberStyles.Any, CultureInfo.InvariantCulture, out Double minutes))
                 {
+                    if (minutes < 0.5) minutes = 0.5;
+                    if (minutes > 7200) minutes = 7200;
+
                     String displayName;
                     if (minutes >= 60)
                     {
                         Int32 h = (Int32)(minutes / 60);
                         Int32 m = (Int32)(minutes % 60);
-                        displayName = m == 0 ? $"{h} Hour(s)" : $"{h}h {m}m";
+                        String hStr = h == 1 ? "hour" : "hours";
+                        String mStr = m == 1 ? "min" : "mins";
+                        displayName = m == 0 ? $"{h} {hStr}" : $"{h} {hStr} {m} {mStr}";
                     }
-                    else if (minutes < 1 && minutes > 0)
+                    else if (minutes < 1)
                     {
                         Int32 s = (Int32)(minutes * 60);
-                        displayName = $"{s} Sec(s)";
+                        String sStr = s == 1 ? "sec" : "secs";
+                        displayName = $"{s} {sStr}";
                     }
                     else
                     {
-                        displayName = $"{minutes} Min(s)";
+                        String mStr = minutes == 1 ? "min" : "mins";
+                        displayName = $"{minutes} {mStr}";
                     }
 
                     e.ActionEditorState.SetDisplayName(displayName);
                 }
                 else
                 {
-                    e.ActionEditorState.SetDisplayName("Pre Defined Time");
+                    e.ActionEditorState.SetDisplayName("Invalid Time");
                 }
             }
         }
@@ -63,6 +70,9 @@ namespace Loupedeck.DemoPlugin
             if (actionParameters.TryGetString(MinutesControlName, out var minutesStr) &&
                 Double.TryParse(minutesStr.Replace(',', '.'), NumberStyles.Any, CultureInfo.InvariantCulture, out Double minutes))
             {
+                if (minutes < 0.5) minutes = 0.5;
+                if (minutes > 7200) minutes = 7200;
+
                 Int32 totalSeconds = (Int32)(minutes * 60);
 
                 if (TimerState.ShutdownTime.HasValue)
