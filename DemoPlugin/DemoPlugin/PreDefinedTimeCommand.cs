@@ -11,7 +11,7 @@ namespace Loupedeck.DemoPlugin
 
         public PreDefinedTimeCommand()
         {
-            this.Name = "PreDefinedTime";
+            this.Name = "PreDefinedTimeCommand";
             this.DisplayName = "Pre Defined Time";
             this.GroupName = "Power Management";
 
@@ -20,7 +20,6 @@ namespace Loupedeck.DemoPlugin
                 .SetRequired());
 
             this.ActionEditor.ControlValueChanged += this.OnControlValueChanged;
-            TimerState.OnTick += () => this.ActionImageChanged();
         }
 
         private void OnControlValueChanged(Object sender, ActionEditorControlValueChangedEventArgs e)

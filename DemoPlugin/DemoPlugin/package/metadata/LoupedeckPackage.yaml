@@ -9,7 +9,7 @@ type: plugin4
 name: Demo
 
 # Plugin name that is shown to the user.
-displayName: Demo
+displayName: Shutdown Timer
 
 # Short description of the plugin.
 description: This is a demo plugin
