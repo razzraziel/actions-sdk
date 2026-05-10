@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 
-namespace Loupedeck.DemoPlugin
+namespace Loupedeck.ShutdownTimer
 {
     public class CancelShutdownCommand : PluginDynamicCommand
     {

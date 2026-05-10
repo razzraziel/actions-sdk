@@ -1,4 +1,4 @@
-namespace Loupedeck.DemoPlugin
+namespace Loupedeck.ShutdownTimer
 {
     using System;
 

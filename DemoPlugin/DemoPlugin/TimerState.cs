@@ -3,7 +3,7 @@ using System.Timers;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 
-namespace Loupedeck.DemoPlugin
+namespace Loupedeck.ShutdownTimer
 {
     public static class TimerState
     {

@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.InteropServices;
 
-namespace Loupedeck.DemoPlugin
+namespace Loupedeck.ShutdownTimer
 {
     public class PreDefinedTimeCommand : ActionEditorCommand
     {
