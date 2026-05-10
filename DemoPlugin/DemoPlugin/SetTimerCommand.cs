@@ -5,10 +5,10 @@ using System.Runtime.InteropServices;
 
 namespace Loupedeck.DemoPlugin
 {
-    public class CustomTimeCommand : PluginDynamicCommand
+    public class SetTimerCommand : PluginDynamicCommand
     {
-        public CustomTimeCommand()
-            : base("Custom Time", "Prompts for minutes and starts timer", "Power Management")
+        public SetTimerCommand()
+            : base("Set Timer", "Prompts for minutes and starts timer", "Power Management")
         {
             TimerState.OnTick += () => this.ActionImageChanged();
         }
@@ -33,7 +33,7 @@ namespace Loupedeck.DemoPlugin
                 {
                     process.StandardInput.WriteLine("tell application \"System Events\"");
                     process.StandardInput.WriteLine("activate");
-                    process.StandardInput.WriteLine("set response to display dialog \"Kac dakika sonra kapansin?\" default answer \"60\" buttons {\"Iptal\", \"Baslat\"} default button 2");
+                    process.StandardInput.WriteLine("set response to display dialog \"How many minutes until shutdown?\" default answer \"60\" buttons {\"Cancel\", \"Start\"} default button 2");
                     process.StandardInput.WriteLine("text returned of response");
                     process.StandardInput.WriteLine("end tell");
                     process.StandardInput.Close();
@@ -44,7 +44,7 @@ namespace Loupedeck.DemoPlugin
             }
             else
             {
-                String script = "Add-Type -AssemblyName System.Windows.Forms; Add-Type -AssemblyName System.Drawing; $f = New-Object System.Windows.Forms.Form; $f.Text = 'Custom Time'; $f.Size = New-Object System.Drawing.Size(300,165); $f.StartPosition = 'CenterScreen'; $f.FormBorderStyle = 'FixedToolWindow'; $f.BackColor = [System.Drawing.Color]::FromArgb(32,32,32); $f.ForeColor = [System.Drawing.Color]::White; $f.TopMost = $true; $f.Font = New-Object System.Drawing.Font('Segoe UI', 10); $l = New-Object System.Windows.Forms.Label; $l.Text = 'Kac dakika sonra kapansin?'; $l.Location = New-Object System.Drawing.Point(15,15); $l.AutoSize = $true; $t = New-Object System.Windows.Forms.TextBox; $t.Location = New-Object System.Drawing.Point(15,45); $t.Size = New-Object System.Drawing.Size(250,25); $t.BackColor = [System.Drawing.Color]::FromArgb(45,45,45); $t.ForeColor = [System.Drawing.Color]::White; $t.BorderStyle = 'FixedSingle'; $b = New-Object System.Windows.Forms.Button; $b.Text = 'Baslat'; $b.Location = New-Object System.Drawing.Point(15,80); $b.Size = New-Object System.Drawing.Size(250,30); $b.FlatStyle = 'Flat'; $b.FlatAppearance.BorderSize = 0; $b.BackColor = [System.Drawing.Color]::FromArgb(0,120,215); $b.DialogResult = [System.Windows.Forms.DialogResult]::OK; $f.Controls.Add($l); $f.Controls.Add($t); $f.Controls.Add($b); $f.AcceptButton = $b; if ($f.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) { Write-Output $t.Text }";
+                String script = "Add-Type -AssemblyName System.Windows.Forms; Add-Type -AssemblyName System.Drawing; $f = New-Object System.Windows.Forms.Form; $f.Text = 'Set Timer'; $f.Size = New-Object System.Drawing.Size(300,165); $f.StartPosition = 'CenterScreen'; $f.FormBorderStyle = 'FixedToolWindow'; $f.BackColor = [System.Drawing.Color]::FromArgb(32,32,32); $f.ForeColor = [System.Drawing.Color]::White; $f.TopMost = $true; $f.Font = New-Object System.Drawing.Font('Segoe UI', 10); $l = New-Object System.Windows.Forms.Label; $l.Text = 'How many minutes until shutdown?'; $l.Location = New-Object System.Drawing.Point(15,15); $l.AutoSize = $true; $t = New-Object System.Windows.Forms.TextBox; $t.Location = New-Object System.Drawing.Point(15,45); $t.Size = New-Object System.Drawing.Size(250,25); $t.BackColor = [System.Drawing.Color]::FromArgb(45,45,45); $t.ForeColor = [System.Drawing.Color]::White; $t.BorderStyle = 'FixedSingle'; $b = New-Object System.Windows.Forms.Button; $b.Text = 'Start'; $b.Location = New-Object System.Drawing.Point(15,80); $b.Size = New-Object System.Drawing.Size(250,30); $b.FlatStyle = 'Flat'; $b.FlatAppearance.BorderSize = 0; $b.BackColor = [System.Drawing.Color]::FromArgb(0,120,215); $b.DialogResult = [System.Windows.Forms.DialogResult]::OK; $f.Controls.Add($l); $f.Controls.Add($t); $f.Controls.Add($b); $f.AcceptButton = $b; if ($f.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) { Write-Output $t.Text }";
 
                 String encoded = Convert.ToBase64String(System.Text.Encoding.Unicode.GetBytes(script));
 
@@ -95,10 +95,21 @@ namespace Loupedeck.DemoPlugin
                 TimeSpan t = TimerState.ShutdownTime.Value - DateTime.Now;
                 if (t.TotalSeconds > 0)
                 {
-                    return $"{(Int32)t.TotalHours:D2}:{t.Minutes:D2}:{t.Seconds:D2}";
+                    if (t.TotalHours >= 1)
+                    {
+                        return $"{(Int32)t.TotalHours}:{t.Minutes:D2}:{t.Seconds:D2}";
+                    }
+                    else if (t.TotalMinutes >= 1)
+                    {
+                        return $"{t.Minutes}:{t.Seconds:D2}";
+                    }
+                    else
+                    {
+                        return $"{t.Seconds}";
+                    }
                 }
             }
-            return "Custom Time";
+            return "Set Timer";
         }
     }
 }

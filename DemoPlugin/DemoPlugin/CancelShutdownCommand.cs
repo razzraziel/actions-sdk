@@ -25,9 +25,27 @@ namespace Loupedeck.DemoPlugin
             }
         }
 
+        protected override BitmapImage GetCommandImage(String actionParameter, PluginImageSize imageSize)
+        {
+            if (TimerState.ShutdownTime.HasValue)
+            {
+                using (var bitmapBuilder = new BitmapBuilder(imageSize))
+                {
+                    var activeRed = new BitmapColor(180, 0, 0);
+                    bitmapBuilder.Clear(activeRed);
+
+                    bitmapBuilder.DrawText("Cancel");
+
+                    return bitmapBuilder.ToImage();
+                }
+            }
+
+            return null;
+        }
+
         protected override String GetCommandDisplayName(String actionParameter, PluginImageSize imageSize)
         {
-            return TimerState.ShutdownTime.HasValue ? "Cancel Timer" : "No Active Timer";
+            return TimerState.ShutdownTime.HasValue ? "" : "No Active Timer";
         }
     }
 }
